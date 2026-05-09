@@ -5,12 +5,13 @@ on:
     inputs:
       artifact_name:
         description: 'Name of the artifact to download'
-        required: true
+        required: false
         type: string
       gitcode_repository:
         description: 'GitCode repository path (e.g., username/repo)'
         required: true
         type: string
+        default: ${{ vars.GITCODE_REPOSITORY || github.repository }}
       default_branch:
         description: 'Default branch for the release'
         required: false
@@ -44,6 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Download artifact
+        if: ${{ inputs.artifact_name }}
         uses: actions/download-artifact@v8
         with:
           pattern: '${{ inputs.artifact_name }}'
