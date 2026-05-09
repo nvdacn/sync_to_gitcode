@@ -1,0 +1,143 @@
+name: GitCode Release
+
+on:
+  workflow_call:
+    inputs:
+      artifact_name:
+        description: 'Name of the artifact to download'
+        required: true
+        type: string
+      gitcode_repository:
+        description: 'GitCode repository path (e.g., username/repo)'
+        required: true
+        type: string
+      default_branch:
+        description: 'Default branch for the release'
+        required: false
+        type: string
+        default: 'master'
+      tag_name:
+        description: 'Tag name for release'
+        required: true
+        type: string
+      body:
+        description: 'Release body/content in markdown format'
+        required: true
+        type: string
+      prerelease:
+        description: 'Whether this is a prerelease (beta)'
+        required: false
+        type: boolean
+        default: false
+      file_name:
+        description: 'File name pattern to upload (supports wildcards)'
+        required: true
+        type: string
+    secrets:
+      GITCODE_TOKEN:
+        description: 'GitCode access token'
+        required: true
+
+jobs:
+  gitcode_release:
+    name: Create Release on GitCode
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Archive
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ inputs.artifact_name }}
+          path: .
+      - name: Check if Release exists on GitCode
+        id: check_release
+        run: |
+          RESPONSE=$(curl -L -sS -o /dev/null -w "%{http_code}" \
+            -H 'PRIVATE-TOKEN: ${{ secrets.GITCODE_TOKEN }}' \
+            -H "Accept: application/json" \
+            "https://api.gitcode.com/api/v5/repos/${{ inputs.gitcode_repository }}/releases/tags/${{ inputs.tag_name }}")
+          if [ "$RESPONSE" = "200" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Release already exists on GitCode"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Release does not exist on GitCode"
+          fi
+      - name: Create Release on GitCode
+        if: steps.check_release.outputs.exists == 'false'
+        id: create_release
+        run: |
+          echo "Creating new release on GitCode..."
+          RESPONSE=$(curl -L -o response.json -sS -w "%{http_code}" \
+            -X POST \
+            -H 'PRIVATE-TOKEN: ${{ secrets.GITCODE_TOKEN }}' \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            -d '{
+              "tag_name": "${{ inputs.tag_name }}",
+              "target_commitish": "${{ inputs.default_branch }}",
+              "name": "${{ inputs.tag_name }}",
+              "body": ${{ toJSON(inputs.body) }},
+              "release_status": "${{ inputs.prerelease && 'pre' || 'latest' }}"
+            }' \
+            "https://api.gitcode.com/api/v5/repos/${{ inputs.gitcode_repository }}/releases")
+          if [ "$RESPONSE" = "200" ]; then
+            echo "✅ Release created successfully on GitCode"
+          else
+            echo "❌ Failed to create release. Response code: $RESPONSE"
+            cat response.json
+            exit 1
+          fi
+      - name: Update Release on GitCode
+        if: steps.check_release.outputs.exists == 'true'
+        id: update_release
+        run: |
+          echo "Updating existing release on GitCode..."
+          RESPONSE=$(curl -L -o response.json -sS -w "%{http_code}" \
+            -X PATCH \
+            -H 'PRIVATE-TOKEN: ${{ secrets.GITCODE_TOKEN }}' \
+            -H "Content-Type: application/json" \
+            -H "Accept: application/json" \
+            -d '{
+              "tag_name": "${{ inputs.tag_name }}",
+              "name": "${{ inputs.tag_name }}",
+              "body": ${{ toJSON(inputs.body) }},
+              "release_status": "${{ inputs.prerelease && 'pre' || 'latest' }}"
+            }' \
+            "https://api.gitcode.com/api/v5/repos/${{ inputs.gitcode_repository }}/releases/${{ inputs.tag_name }}")
+          if [ "$RESPONSE" = "200" ]; then
+            echo "✅ Release updated successfully on GitCode"
+          else
+            echo "❌ Failed to update release. Response code: $RESPONSE"
+            cat response.json
+            exit 1
+          fi
+      - name: Upload Build Artifacts to Release
+        run: |
+          for file in ${{ inputs.file_name }}; do
+            echo "Uploading $file..."
+            UPLOAD_INFO=$(curl -sS \
+              -H 'PRIVATE-TOKEN: ${{ secrets.GITCODE_TOKEN }}' \
+              -H "Accept: application/json" \
+              "https://api.gitcode.com/api/v5/repos/${{ inputs.gitcode_repository }}/releases/${{ inputs.tag_name }}/upload_url?file_name=$file")
+            UPLOAD_URL=$(echo "$UPLOAD_INFO" | jq -r '.url')
+            CURL_HEADERS=()
+            HEADERS_JSON=$(echo "$UPLOAD_INFO" | jq -r '.headers // empty')
+            if [ -n "$HEADERS_JSON" ] && [ "$HEADERS_JSON" != "null" ]; then
+              while IFS='' read -r line; do
+                if [ -n "$line" ]; then
+                  CURL_HEADERS+=("-H" "$line")
+                fi
+              done < <(echo "$HEADERS_JSON" | jq -r 'to_entries[] | "\(.key): \(.value)"')
+            fi
+            RESPONSE=$(curl -X PUT -w "%{http_code}" -o "$file.response.json" --retry 3 \
+              -T "$file" \
+              "${CURL_HEADERS[@]}" \
+              "$UPLOAD_URL")
+            if [ "$RESPONSE" = "200" ]; then
+              echo "✅ Uploaded $file successfully"
+            else
+              echo "❌ Failed to upload $file. Response code: $RESPONSE"
+              cat "$file.response.json"
+              exit 1
+            fi
+          done
