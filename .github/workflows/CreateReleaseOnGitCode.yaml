@@ -68,7 +68,8 @@ jobs:
         id: create_release
         run: |
           echo "Creating new release on GitCode..."
-          RESPONSE=$(curl -L -o response.json -sS -w "%{http_code}" \
+          TEMP_RESPONSE="/tmp/release_create_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}.json"
+          RESPONSE=$(curl -L -o "$TEMP_RESPONSE" -sS -w "%{http_code}" \
             -X POST \
             -H 'PRIVATE-TOKEN: ${{ secrets.GITCODE_TOKEN }}' \
             -H "Content-Type: application/json" \
@@ -85,7 +86,7 @@ jobs:
             echo "✅ Release created successfully on GitCode"
           else
             echo "❌ Failed to create release. Response code: $RESPONSE"
-            cat response.json
+            cat "$TEMP_RESPONSE"
             exit 1
           fi
       - name: Update Release on GitCode
@@ -93,7 +94,8 @@ jobs:
         id: update_release
         run: |
           echo "Updating existing release on GitCode..."
-          RESPONSE=$(curl -L -o response.json -sS -w "%{http_code}" \
+          TEMP_RESPONSE="/tmp/release_update_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}.json"
+          RESPONSE=$(curl -L -o "$TEMP_RESPONSE" -sS -w "%{http_code}" \
             -X PATCH \
             -H 'PRIVATE-TOKEN: ${{ secrets.GITCODE_TOKEN }}' \
             -H "Content-Type: application/json" \
@@ -109,7 +111,7 @@ jobs:
             echo "✅ Release updated successfully on GitCode"
           else
             echo "❌ Failed to update release. Response code: $RESPONSE"
-            cat response.json
+            cat "$TEMP_RESPONSE"
             exit 1
           fi
       - name: Upload Build Artifacts to Release
@@ -130,7 +132,8 @@ jobs:
                 fi
               done < <(echo "$HEADERS_JSON" | jq -r 'to_entries[] | "\(.key): \(.value)"')
             fi
-            RESPONSE=$(curl -X PUT -w "%{http_code}" -o "$file.response.json" --retry 3 \
+            TEMP_RESPONSE="/tmp/upload_${file}_${GITHUB_RUN_ID}_${GITHUB_RUN_ATTEMPT}.json"
+            RESPONSE=$(curl -X PUT -w "%{http_code}" -o "$TEMP_RESPONSE" --retry 3 \
               -T "$file" \
               "${CURL_HEADERS[@]}" \
               "$UPLOAD_URL")
@@ -138,7 +141,7 @@ jobs:
               echo "✅ Uploaded $file successfully"
             else
               echo "❌ Failed to upload $file. Response code: $RESPONSE"
-              cat "$file.response.json"
+              cat "$TEMP_RESPONSE"
               exit 1
             fi
           done
