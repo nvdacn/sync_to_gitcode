@@ -43,10 +43,10 @@ jobs:
     name: Create Release on GitCode
     runs-on: ubuntu-latest
     steps:
-      - name: Download Archive
+      - name: Download artifact
         uses: actions/download-artifact@v8
         with:
-          pattern: ${{ inputs.artifact_name }}*
+          pattern: '${{ inputs.artifact_name }}*'
           path: .
           merge-multiple: true
       - name: Check if Release exists on GitCode
