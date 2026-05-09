@@ -36,7 +36,7 @@
 | 参数 | 说明 |
 | --- | --- |
 | `needs` | 此处需填写必须的 job id，如 `build`，只有这些工作流成功运行后，才能运行后续步骤，必须添加处理要上传到 GitCode 的文件的 job id |
-| `artifact_name` | 要下载的 artifact 名称，支持多文件与通配符。要上传到 GitCode 发行版的附件。该 artifact 应是此前在当前工作流中由[actions/upload-artifact](https://github.com/actions/upload-artifact)进行上传 |
+| `artifact_name` | 要下载的 artifact 名称，支持多文件与通配符。要上传到 GitCode 发行版的附件。应是此前在当前工作流中由[actions/upload-artifact](https://github.com/actions/upload-artifact)进行上传的文件 |
 | `default_branch` | 要推送到 GitCode 的分支名称，若分支为 `master`，则可省略该参数 |
 | `gitcode_repository` | 您的 GitCode 存储库路径，例如 nvdacn/sync_to_gitcode，若您设置了 `GITCODE_REPOSITORY` [存储库变量](https://docs.github.com/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository)或您的 GitCode 存储库路径与 GitHub 完全相同，则可省略该参数 |
 | `tag_name` | GitCode 标签名称，推荐与 GitHub 相同 |
