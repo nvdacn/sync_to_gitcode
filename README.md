@@ -1,6 +1,6 @@
 # 概述
 
-此存储库具有用于将 GitHub 存储库的源代码和发行版同步到 GitCode 的相应存储库的可重用工作流，您可在相关工作流中调用这些可重用工作流。
+此存储库具有用于将 GitHub 存储库的源代码和发行版同步到 GitCode 的相应存储库的[可重用工作流](https://docs.github.com/actions/using-workflows/reusing-workflows)，您可在相关工作流中调用这些可重用工作流。
 
 # 用法
 
