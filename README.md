@@ -47,13 +47,13 @@
 
 | 参数 | 说明 |
 | --- | --- |
-| `artifact_name` | 要下载的 artifact 名称，支持多文件与通配符。要上传到 GitCode 发行版的附件。应是此前在当前工作流中由[actions/upload-artifact](https://github.com/actions/upload-artifact)上传的文件 |
+| `artifact_name` | 要下载的 artifact 名称，支持多文件与通配符。准备上传到 GitCode 发行版的附件。应是此前在当前工作流中由[actions/upload-artifact](https://github.com/actions/upload-artifact)上传的文件 |
 | `default_branch` | 要推送到 GitCode 的分支名称，若分支为 `master`，则可省略该参数 |
-| `gitcode_repository` | 您的 GitCode 存储库路径，例如 nvdacn/sync_to_gitcode，若您设置了 `GITCODE_REPOSITORY` [存储库变量](https://docs.github.com/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository)或您的 GitCode 存储库路径与 GitHub 完全相同，则可省略该参数 |
+| `gitcode_repository` | 您的 GitCode 存储库路径，例如 `nvdacn/sync_to_gitcode`，若您设置了 `GITCODE_REPOSITORY` [存储库变量](https://docs.github.com/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository)或您的 GitCode 存储库路径与 GitHub 完全相同，则可省略该参数 |
 | `tag_name` | GitCode 标签名称，推荐与 GitHub 相同 |
 | `body` | 发布正文 |
 | `prerelease` | 是否为预发布版本 |
-| `file_name` | 要上传到 GitCode 的文件名，支持通配符，若该文件名可以匹配到多个文件，则会全部上传 |
+| `file_name` | 从下载的 artifact 中筛选要上传到 GitCode 发行版的附件，支持通配符，若匹配到多个文件，则会全部上传 |
 | `GITCODE_TOKEN` | GitCode 的[个人访问令牌](https://gitcode.com/setting/token-classic)，应通过 [GitHub 机密](https://docs.github.com/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)传入该参数 |
 
 ### 调用示例
