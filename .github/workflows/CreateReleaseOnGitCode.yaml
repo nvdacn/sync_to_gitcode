@@ -46,8 +46,9 @@ jobs:
       - name: Download Archive
         uses: actions/download-artifact@v8
         with:
-          name: ${{ inputs.artifact_name }}
+          pattern: ${{ inputs.artifact_name }}*
           path: .
+          merge-multiple: true
       - name: Check if Release exists on GitCode
         id: check_release
         run: |
