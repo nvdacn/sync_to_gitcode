@@ -46,7 +46,7 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v8
         with:
-          pattern: '${{ inputs.artifact_name }}*'
+          pattern: '${{ inputs.artifact_name }}'
           path: .
           merge-multiple: true
       - name: Check if Release exists on GitCode
