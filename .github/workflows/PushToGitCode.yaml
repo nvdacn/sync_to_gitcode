@@ -1,0 +1,41 @@
+name: GitCode Push
+
+on:
+  workflow_call:
+    inputs:
+      default_branch:
+        description: 'Default branch to push to GitCode'
+        required: false
+        type: string
+        default: 'master'
+      gitcode_username:
+        description: 'GitCode username for authentication'
+        required: true
+        type: string
+      gitcode_repository:
+        description: 'GitCode repository path (e.g., username/repo)'
+        required: true
+        type: string
+        default: ${{ vars.GITCODE_REPOSITORY || github.repository }}
+    secrets:
+      GITCODE_TOKEN:
+        description: 'GitCode access token'
+        required: true
+
+jobs:
+  push_to_gitcode:
+    name: Push to GitCode
+    runs-on: ubuntu-latest
+    if: ${{ inputs.gitcode_username }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.default_branch }}
+      - name: Push to GitCode
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "github-actions@github.com"
+          git remote add gitcode https://${{ inputs.gitcode_username }}:${{ secrets.GITCODE_TOKEN }}@gitcode.com/${{ inputs.gitcode_repository }}.git
+          git push gitcode --tags --force ${{ inputs.default_branch }}:${{ inputs.default_branch }}
