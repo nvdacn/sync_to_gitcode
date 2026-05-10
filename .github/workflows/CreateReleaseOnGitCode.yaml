@@ -9,7 +9,7 @@ on:
         type: string
       gitcode_repository:
         description: 'GitCode repository path (e.g., username/repo)'
-        required: true
+        required: false
         type: string
         default: ${{ vars.GITCODE_REPOSITORY || github.repository }}
       default_branch:

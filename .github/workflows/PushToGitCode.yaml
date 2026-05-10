@@ -5,7 +5,7 @@ on:
     inputs:
       default_branch:
         description: 'Default branch to push to GitCode'
-        required: true
+        required: false
         type: string
         default: 'master'
       gitcode_username:
@@ -14,7 +14,7 @@ on:
         type: string
       gitcode_repository:
         description: 'GitCode repository path (e.g., username/repo)'
-        required: true
+        required: false
         type: string
         default: ${{ vars.GITCODE_REPOSITORY || github.repository }}
     secrets:
@@ -26,7 +26,6 @@ jobs:
   push_to_gitcode:
     name: Push to GitCode
     runs-on: ubuntu-latest
-    if: ${{ inputs.gitcode_username }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
