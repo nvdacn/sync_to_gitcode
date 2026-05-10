@@ -19,12 +19,14 @@ on:
         default: 'master'
       tag_name:
         description: 'Tag name for release'
-        required: true
+        required: false
         type: string
+        default: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
       body:
         description: 'Release body/content in markdown format'
-        required: true
+        required: false
         type: string
+        default: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
       prerelease:
         description: 'Whether this is a prerelease (beta)'
         required: false
@@ -32,8 +34,9 @@ on:
         default: false
       file_name:
         description: 'File name pattern to upload (supports wildcards)'
-        required: true
+        required: false
         type: string
+        default: '*.*'
     secrets:
       GITCODE_TOKEN:
         description: 'GitCode access token'
