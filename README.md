@@ -61,7 +61,7 @@
 ```yaml
   gitcode_release:
     name: Create Release on GitCode
-    needs: 
+    needs:
       - gitcode_push
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
     uses: nvdacn/sync_to_gitcode/.github/workflows/CreateReleaseOnGitCode.yaml@master
