@@ -11,7 +11,7 @@
 | 参数 | 说明 |
 | --- | --- |
 | `default_branch` | 要推送到 GitCode 的分支名称，若分支为 `master`，则可省略该参数 |
-| `gitcode_username` | 您的 GitCode 用户名，用于推送到 GitCode 时验证身份。推荐将其保存为 `GITCODE_USERNAME` [存储库变量](https://docs.github.com/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository)。在调用时配合 `if: ${{ vars.GITCODE_USERNAME }}` 使用，可根据该变量是否存在来决定是否运行该 Job，从而避免在 Fork 的存储库中因缺少配置而导致工作流报错 |
+| `gitcode_username` | 您的 GitCode 用户名，用于推送到 GitCode 时验证身份。推荐将其保存为 `GITCODE_USERNAME` [存储库变量](https://docs.github.com/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository)。在调用此工作流时添加 `if: ${{ vars.GITCODE_USERNAME }}`，可实现根据该变量的存在与否决定是否运行调用的 Job，从而避免在 Fork 的存储库中因缺少配置而导致工作流失败 |
 | `gitcode_repository` | 您的 GitCode 存储库路径，例如 `nvdacn/sync_to_gitcode`，若您设置了 `GITCODE_REPOSITORY` [存储库变量](https://docs.github.com/actions/learn-github-actions/variables#creating-configuration-variables-for-a-repository)或您的 GitCode 存储库路径与 GitHub 完全相同，则可省略该参数 |
 | `GITCODE_TOKEN` | GitCode 的[个人访问令牌](https://gitcode.com/setting/token-classic)，应通过 [GitHub 机密](https://docs.github.com/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)传入该参数 |
 
